@@ -1,7 +1,7 @@
-import './styles/style.scss';
+import 'reflect-metadata';
+import {Engine} from "./Engine";
+import {Container} from "typedi";
+import {settings} from "ts-mixer";
 
-console.log('hello, world');
-
-const testMessage: string = 'TypeScript works';
-
-console.log(testMessage);
+const engine = Container.get(Engine)
+engine.start()
