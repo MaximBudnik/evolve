@@ -6,17 +6,16 @@ import {Group} from "tweedle.js";
 import {Viewport} from "pixi-viewport";
 import {Colors} from "./colors";
 import {World} from "./World";
+import {ContainerKeys} from "./utils/ContainerKeys";
 
 @Service()
 export class Engine {
-    static readonly loopTimeout = 500
+    static readonly gameLoopTimeout = 500
+    static readonly renderLoopTimeout = 100
     private render: Application
     private readonly viewport: Viewport
-    private water: Graphics
 
     constructor(
-        @Inject()
-        private organismGenerator: OrganismGenerator,
         @Inject()
         private world: World,
     ) {
@@ -38,36 +37,39 @@ export class Engine {
             .wheel()
             .decelerate()
         this.render.stage.addChild(this.viewport)
-        Container.set('viewport', this.viewport);
+        Container.set(ContainerKeys.viewport, this.viewport);
+        Container.set(ContainerKeys.render, this.render);
         this.viewport.fitWorld()
-        this.drawWater()
-    }
-
-    drawWater = () => {
-        this.water = this.viewport.addChild(new Graphics())
-        const [r, g, b] = utils.hex2rgb(utils.string2hex(Colors.water))
-        const blockHeight = World.size / 10
-        for (let i = 0; i < 10; i++) {
-            const start = blockHeight * i
-            const k = (i * 7.5) / 255
-            const color = utils.rgb2hex([r - k, g - k, b - k])
-            this.water.beginFill(color)
-            this.water.drawRect(0, start, World.size, blockHeight)
-        }
-
+        this.world.init()
     }
 
     start = () => {
-        this.organismGenerator.generate()
         document.body.appendChild(this.render.view)
         this.gameLoop()
         this.tweenLoop()
+        this.renderLoop()
     }
 
+    private gameLoopCount = 0
+    private renderLoopCount = 0
+
     private gameLoop = () => {
-        console.log(performance.now())
-        this.world.onGameLoop()
-        setTimeout(this.gameLoop, Engine.loopTimeout)
+        // console.log(performance.now())
+        this.world.onGameLoop(this.gameLoopCount)
+        this.gameLoopCount++
+        if(this.gameLoopCount > 100){
+            this.gameLoopCount = 0
+        }
+        setTimeout(this.gameLoop, Engine.gameLoopTimeout)
+    }
+
+    private renderLoop = () =>{
+        // this.world.onRenderLoop(this.renderLoopCount)
+        // this.renderLoopCount++
+        // if(this.renderLoopCount > 1000){
+        //     this.renderLoopCount = 0
+        // }
+        // setTimeout(this.renderLoop, Engine.renderLoopTimeout)
     }
 
     tweenLoop = () => {

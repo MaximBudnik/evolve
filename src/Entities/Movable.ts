@@ -11,6 +11,6 @@ export class Movable extends Entity {
             return
         }
         // @ts-ignore
-        new Tween(this.graphics.position).to({x, y}, Engine.loopTimeout).start();
+        new Tween(this.graphics.position).to({x, y}, Engine.gameLoopTimeout).start();
     }
 }
